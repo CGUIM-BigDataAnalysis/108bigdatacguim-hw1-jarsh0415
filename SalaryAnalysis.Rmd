@@ -12,45 +12,45 @@ author: 談家旭
 ```{r dataload}
 library(readr)
 library(dplyr)
-dataset1 <- read_csv("D:/jarsh/下載/104.csv")
-dataset2 <- read_csv("D:/jarsh/下載/107年各教育程度別初任人員每人每月經常性薪資─按大職類分.csv")
+dataset104 <- read_csv("D:/jarsh/下載/104.csv")
+dataset107 <- read_csv("D:/jarsh/下載/107年各教育程度別初任人員每人每月經常性薪資─按大職類分.csv")
 
-dataset1$大職業別<-gsub("部門|、","",dataset1$大職業別)
-dataset2$大職業別<-gsub("_","",dataset2$大職業別)
-dataset2$大職業別<-gsub("建工程","造業",dataset2$大職業別)
-dataset2$大職業別<-gsub("出版、影音製作、傳播及資通訊服務業","資訊及通訊傳播業",dataset2$大職業別)
-dataset2$大職業別<-gsub("教育業","教育服務業",dataset2$大職業別)
-dataset2$大職業別<-gsub("醫療保健業","醫療保健服務業",dataset2$大職業別)
+dataset104$大職業別<-gsub("部門|、","",dataset104$大職業別)
+dataset107$大職業別<-gsub("_","",dataset107$大職業別)
+dataset107$大職業別<-gsub("建工程","造業",dataset107$大職業別)
+dataset107$大職業別<-gsub("出版、影音製作、傳播及資通訊服務業","資訊及通訊傳播業",dataset107$大職業別)
+dataset107$大職業別<-gsub("教育業","教育服務業",dataset107$大職業別)
+dataset107$大職業別<-gsub("醫療保健業","醫療保健服務業",dataset107$大職業別)
 
 for(i in 1:140){
-  if (dataset2$大職業別[i] != dataset1$大職業別[i]){
-    print(dataset1$大職業別[i])
-    print(dataset2$大職業別[i])
+  if (dataset107$大職業別[i] != dataset104$大職業別[i]){
+    print(dataset104$大職業別[i])
+    print(dataset107$大職業別[i])
   }
 }
 
-dataset2$`大學-薪資`<-as.numeric(gsub("—|…",NA,dataset2$`大學-薪資`))
-dataset1$`大學-薪資`<-as.numeric(gsub("—|…",NA,dataset1$`大學-薪資`))
+dataset107$`大學-薪資`<-as.numeric(gsub("—|…",NA,dataset107$`大學-薪資`))
+dataset104$`大學-薪資`<-as.numeric(gsub("—|…",NA,dataset104$`大學-薪資`))
 ```
 
 ### 107年度薪資較104年度薪資高的職業有哪些? 
 ```{r compare103106}
-salary <- data.frame(profession=dataset1$大職業別)
-salary$s<-dataset2$`大學-薪資`/dataset1$`大學-薪資`
+salary <- data.frame(profession=dataset104$大職業別)
+salary$s<-dataset107$`大學-薪資`/dataset104$`大學-薪資`
 
 salary<-salary[complete.cases(salary$s),]
-salary$s<-sort(salary$s,decreasing = T)
-knitr::kable(head(salary,9))
+salary<-salary[order(salary$s,decreasing = T),]
+knitr::kable(head(salary,10))
 ```
 
-107薪資較104薪資高的前十筆都屬於工業類的職業，看得出這些職業的成長筆機會很高，尤其是加上服務業的工業前六名都是他，工業及服務業和工業職業類別比細分下去的職業高，可能是類別有包含無法細分的資料特殊個體，所以才能高於細分下去的職業。
+107薪資較104薪資高的10個職業有四個有關教育服務業看來老師這類行業薪資是有所成長，有三個不動產、金融、專業科學及技術服務業會需要使用資料分析，所以學了還是不會被世界淘汰，服務及銷售工作人員工作的變動。
 
 ### 提高超過5%的職業有哪些? 
 ```{r over5}
 knitr::kable(filter(salary,s>1.05))
 ```
 
-總共有53筆職業107-104薪資成長超過5%，專業人員、技術員及助理專業人員、事務支援人員、服務及銷售工作人員、技藝機械設備操作及組裝人員此五種細分作業，而薪水調漲順序也是上述排序，可看出專業人員、技術員及助理專業人員的潛力，可推論出越能有唯一性、創新性是調薪的原因。
+總共有53筆職業107-104薪資成長超過5%，專業人員、技術員及助理專業人員、事務支援人員、服務及銷售工作人員、技藝機械設備操作及組裝人員此五種細分作業，服務及銷售工作人員在前十名佔第一名，事務支援人員、專業人員排第二，看來服務業的薪資成長較有潛力，可能原因是最低薪資的提升，而其他工作因為比最低薪資高，所以調薪較小。
 
 ### 主要的職業種別是哪些種類呢?
 ```{r mainType}
@@ -62,11 +62,11 @@ for(i in 1:117){
 names(table(as.character(salary$pp)))
 
 
-a<-filter(salary,s>1.05)
-knitr::kable(table(as.character(a$pp)))
+OverAverage<-filter(salary,s>1.05)
+knitr::kable(table(as.character(OverAverage$pp)))
 ```
 
-總共職業分為20類，超過5%的職業種類分成9種，服務業、工業、礦業、製造業提升可能是最低薪資提升，而醫療保健服務業之所以沒提昇可能是原本就比最低薪資高，但因物價的上漲，薪資的調漲如果沒跟上這可能是另類的降薪。
+總共職業分為20類，超過5%的職業種類分成19種，其中不動產業、金融及保險業、資訊及通訊傳播業、運輸及倉儲業、藝術娛樂及休閒服務業整個職業體都超過5%的提升，看來這類的主要職業別給的保障較高。
 
 ## 男女同工不同酬現況分析
 
@@ -74,13 +74,13 @@ knitr::kable(table(as.character(a$pp)))
 
 ### 104和107年度的大學畢業薪資資料，哪些行業男生薪資比女生薪資多?
 ```{r male}
-dataset1$`大學-女/男`<-as.numeric(gsub("—|…",NA,dataset1$`大學-女/男`))
-a<-dataset1[complete.cases(dataset1$`大學-女/男`),]
-a$`大學-女/男`<-sort(a$`大學-女/男`,decreasing = T)
+dataset104$`大學-女/男`<-as.numeric(gsub("—|…",NA,dataset104$`大學-女/男`))
+a<-dataset104[complete.cases(dataset104$`大學-女/男`),]
+a<-a[order(a$`大學-女/男`,decreasing = T),]
 a<-select(a,大職業別,`大學-女/男`)
-dataset2$`大學-女/男`<-as.numeric(gsub("—|…",NA,dataset2$`大學-女/男`))
-b<-dataset2[complete.cases(dataset2$`大學-女/男`),]
-b$`大學-女/男`<-sort(b$`大學-女/男`,decreasing = T)
+dataset107$`大學-女/男`<-as.numeric(gsub("—|…",NA,dataset107$`大學-女/男`))
+b<-dataset107[complete.cases(dataset107$`大學-女/男`),]
+b<-b[order(b$`大學-女/男`,decreasing = T),]
 b<-select(b,大職業別,`大學-女/男`)
 a$`大學-女/男`<-as.character(a$`大學-女/男`)
 b$`大學-女/男`<-as.character(b$`大學-女/男`)
@@ -88,7 +88,8 @@ knitr::kable(tail(a,10))
 knitr::kable(tail(b,10))
 ```
 
-104(a)年就有111筆資料顯示男性的薪資大於女性，107(b)年則是109筆資料顯示男性的薪資大於女性，不過差別薪水的個數或和性別比的差距有明顯的提升，但還是可以看出就職這些職位的女性還是在全部職位中倒數，所以可得知不是此職業特別需要男性的特性須給出較高薪水吸引男性踏入此行就是此職業較不重視女性，不過也有可能是此職位的男性個體都因較高成就領高薪沒被拉低。
+104(a)年就有111筆資料顯示男性的薪資大於女性，107(b)年則是109筆資料顯示男性的薪資大於女性，不過差別薪水的個數或和性別比的差距有明顯的提升，營造業、用水供應及污染整治業、礦業及土石採取業、電力及燃氣供應業、教育服務業不管是104還是107都是墊底的，雖然性別比差異變小，但直些職業存在的薪資差異需調查一下。
+
 
 ### 哪些行業女生薪資比男生薪資多? 
 ```{r female}
@@ -96,44 +97,43 @@ knitr::kable(head(a,10))
 knitr::kable(head(b,10))
 ```
 
-104(a)只有一筆大於100，為100.26，其他四筆只是剛好等於100；107(b)則是8筆資料等於100，但沒有大於100的個數，這可能才是落實真正的性別平等，可看出工業及服務業和工業薪水較無落差，可能是在此職位不看重性別，而是能力，據我所知技術人員的薪水相差甚多，性別比高好等於100，不免覺得不是一起高低，就是某一性別是為M型薪水分布。
+104(a)只有一筆大於100，為100.26，其他四筆只是剛好等於100；107(b)則是8筆資料等於100，但沒有大於100的個數，這可能才是落實真正的性別平等，而專業科學及技術服務業有可能超過的原因是這職業較少女生，並同時有較高成就領高薪，就是某一性別是為M型薪水分布。
 
 ## 研究所薪資差異
 
 以107年度的資料來看，哪個職業別念研究所最划算呢 (研究所學歷薪資與大學學歷薪資增加比例最多)?
  
 ```{r grad}
-dataset2$`研究所-薪資`<-as.numeric(gsub("—|…",NA,dataset2$`研究所-薪資`))
-dataset2$`大學-薪資`<-as.numeric(gsub("—|…",NA,dataset2$`大學-薪資`))
-difference <- data.frame(name = dataset2$大職業別)
-difference$d<-dataset2$`研究所-薪資`/dataset2$`大學-薪資`
+dataset107$`研究所-薪資`<-as.numeric(gsub("—|…",NA,dataset107$`研究所-薪資`))
+dataset107$`大學-薪資`<-as.numeric(gsub("—|…",NA,dataset107$`大學-薪資`))
+difference <- data.frame(name = dataset107$大職業別)
+difference$d<-dataset107$`研究所-薪資`/dataset107$`大學-薪資`
 difference<-difference[complete.cases(difference$d),]
-difference$d<- sort(difference$d,decreasing = T)
+difference<-difference[order(difference$d,decreasing = T),]
 
 knitr::kable(head(difference,10))
 knitr::kable(head(difference,10)[1])
 ```
 
-這十筆資料有8筆都被工業和工業及服務業包辦了，可得知研究所選擇工業相關的學系，在薪資方面有明顯差異。
+這十筆資料有2筆個被資訊及通訊傳播業和專業科學及技術服務業包辦了，可得知研究所選擇資訊、數學相關的學系，在學歷上有茗顯得差別。
 
 ## 我有興趣的職業別薪資狀況分析
 
 ### 有興趣的職業別篩選，呈現薪資
 ```{r like}
-differenceCC <- data.frame(name = dataset2$大職業別,
-                           研究所 =dataset2$`研究所-薪資`,
-                           大學 = dataset2$`大學-薪資`)
+differenceCC <- data.frame(name = dataset107$大職業別,
+                           研究所 =dataset107$`研究所-薪資`,
+                           大學 = dataset107$`大學-薪資`)
 differenceCC<-differenceCC[complete.cases(differenceCC$研究所&differenceCC$大學),]
-differenceCC$研究所<-sort(differenceCC$研究所,decreasing = T)
+differenceCC<-differenceCC[order(differenceCC$研究所,decreasing = T),]
 knitr::kable(head(differenceCC[grep("工業及服務業-專業人員|資訊及通訊傳播業",differenceCC$name),],10))
 ```
 
-挑選出5筆我有興趣的職業，從第一行得編碼可得知除了工業及服務業-專業人員，其他職位都位於中後半，雖然高於22k，但此原始資料的大學薪資最低25K，所以除了工業及服務業-專業人員的職位不只爆肝還沒錢，不知是不是責任制所以不會有加班費這種福利，研究所雖有超過3萬，但資料互比後，心中有點不甘。
+挑選出5筆我有興趣的職業，不出所料，資訊及通訊傳播業薪資高，讀了研究所更高，肝越黑的錢錢月數不完，其他只相差3、4千我就先入社會。
 
 ### 這些職業別研究所薪資與大學薪資差多少呢？
 ```{r likeGrad}
 knitr::kable(difference[grep("工業及服務業-專業人員|資訊及通訊傳播業",difference$name),])
 ```
 
-差蠻多的，相比之下，相差1%，先不論升遷的調薪，工業及服務業-專業人員的研究所可相差七千多，而資訊及通訊傳播業只能相差一千到四千，甚至還低於工業及服務業-專業人員的大學薪資，看來如果真要選擇資訊類的，應該直接投入社會工作，利用閒暇時間研讀，提升硬實力，用實力選擇薪資。
 沒改變我的想法，因為心裡已先預想到這樣的結果了，所以還是想先進入職場學習實用的專業技能，並反思是否要選擇此不歸路，還是另闢一條路。
